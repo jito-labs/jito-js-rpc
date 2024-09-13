@@ -10,3 +10,14 @@ Jito JSON-RPC JS SDK
    npm install
    npm run example
 ```
+
+## Basic Transaction
+```
+   npm run basic_txn
+```
+
+## Basic Bundle
+```
+   npm run basic_bundle
+```
+

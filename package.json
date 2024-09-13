@@ -7,7 +7,9 @@
     "start": "node src/index.js",
     "test": "jest",
     "lint": "eslint .",
-    "example": "node examples/basic_usage.js"
+    "example": "node examples/basic_usage.js",
+    "basic_txn": "node examples/basic_txn.js",
+    "basic_bundle": "node examples/basic_bundle.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,7 @@
   },
   "homepage": "https://github.com/jito-labs/jito-js-rpc#readme",
   "dependencies": {
+    "@solana/web3.js": "^1.95.3",
     "axios": "^1.7.7"
   },
   "devDependencies": {
