@@ -77,10 +77,6 @@ To run the basic bundle example:
    npm run example:basic-bundle
    ```
 
-## API Documentation
-
-For detailed API documentation, please refer to the [official documentation](https://docs.jito.wtf).
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
