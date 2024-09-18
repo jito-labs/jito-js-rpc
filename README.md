@@ -55,7 +55,7 @@ To run the basic transaction example:
 
 2. Run the example:
    ```bash
-   npm run example:basic-transaction
+   node examples/basic_txn.js
    ```
 
 ### Basic Bundle Example
@@ -74,7 +74,7 @@ To run the basic bundle example:
 
 2. Run the example:
    ```bash
-   npm run example:basic-bundle
+   node examples/basic_bundle.js
    ```
 
 ## Contributing
