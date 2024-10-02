@@ -1,0 +1,31 @@
+name: Publish Package to npm
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Publish to npm
+        run: |
+          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
+            npm publish
+          elif [[ ${{ github.ref }} == refs/heads/main ]]; then
+            npm version patch
+            npm publish
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
