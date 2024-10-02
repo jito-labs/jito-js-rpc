@@ -1,6 +1,6 @@
 {
   "name": "jito-js-rpc",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "JavaScript RPC client for Jito",
   "main": "src/index.js",
   "scripts": {
