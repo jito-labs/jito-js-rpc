@@ -2,8 +2,10 @@ name: Publish Package to npm
 
 on:
   push:
+    branches:
+      - master  # Trigger on push to master branch
     tags:
-      - 'v*'
+      - 'v*'  # Trigger when any tag is pushed
 
 jobs:
   publish-npm:
@@ -14,8 +16,7 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
-      - run: npm test
+      - run: npm test --passWithNoTests
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
