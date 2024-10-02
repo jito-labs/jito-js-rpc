@@ -19,17 +19,22 @@ jobs:
       - name: Setup .npmrc
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "Created .npmrc:"
-          cat ~/.npmrc
-      - name: Verify package info
+      - name: Check package version
+        id: check_version
         run: |
-          echo "Package name:"
-          npm pkg get name
-          echo "Package version:"
-          npm pkg get version
-          echo "Package.json content:"
-          cat package.json
+          PACKAGE_NAME=$(npm pkg get name | sed 's/"//g')
+          PACKAGE_VERSION=$(npm pkg get version | sed 's/"//g')
+          echo "Package name: $PACKAGE_NAME"
+          echo "Package version: $PACKAGE_VERSION"
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version &>/dev/null; then
+            echo "Version $PACKAGE_VERSION already exists on npm"
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "Version $PACKAGE_VERSION is new"
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          fi
       - name: Publish to NPM
+        if: steps.check_version.outputs.should_publish == 'true'
         run: |
           ORG="jito-labs"
           PACKAGE_NAME=$(npm pkg get name | sed 's/"//g')
@@ -39,6 +44,9 @@ jobs:
             echo "Updated package name to $NEW_NAME"
           fi
           npm publish --verbose --access public
+      - name: Skip publish
+        if: steps.check_version.outputs.should_publish == 'false'
+        run: echo "Skipping publish as this version already exists on npm"
       - name: Debug publish failure
         if: failure()
         run: |
