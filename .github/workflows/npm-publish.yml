@@ -1,18 +1,21 @@
-name: Simple Node.js Test
+name: Publish Package to npm
 
-on: [push]
+on:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
-  test:
+  publish-npm:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-    - name: Create and run test
-      run: |
-        echo "console.log('Test passed!');" > test.js
-        node test.js
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm test
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
