@@ -6,7 +6,7 @@ on:
       - master  # Trigger on push to master branch
     tags:
       - 'v*'  # Trigger when any tag is pushed
-      
+
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
@@ -21,16 +21,24 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           echo "Created .npmrc:"
           cat ~/.npmrc
-      - name: Debug NPM config
+      - name: Verify package info
         run: |
-          echo "NPM Version:"
-          npm --version
-          echo "NPM Config:"
-          npm config list
+          echo "Package name:"
+          npm pkg get name
+          echo "Package version:"
+          npm pkg get version
           echo "Package.json content:"
           cat package.json
       - name: Publish to NPM
-        run: npm publish --verbose
+        run: |
+          ORG="jito-labs"
+          PACKAGE_NAME=$(npm pkg get name | sed 's/"//g')
+          if [[ $PACKAGE_NAME != @$ORG/* ]]; then
+            NEW_NAME="@$ORG/${PACKAGE_NAME#@*/}"
+            npm pkg set name="$NEW_NAME"
+            echo "Updated package name to $NEW_NAME"
+          fi
+          npm publish --verbose --access public
       - name: Debug publish failure
         if: failure()
         run: |
