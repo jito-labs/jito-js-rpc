@@ -8,47 +8,16 @@ on:
       - 'v*'  # Trigger when any tag is pushed
 
 jobs:
-  publish-npm:
+  publish:
     runs-on: ubuntu-latest
+    environment: NPM_TOKEN
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18'
           registry-url: 'https://registry.npmjs.org'
-      - name: Setup .npmrc
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-      - name: Check package version
-        id: check_version
-        run: |
-          PACKAGE_NAME=$(npm pkg get name | sed 's/"//g')
-          PACKAGE_VERSION=$(npm pkg get version | sed 's/"//g')
-          echo "Package name: $PACKAGE_NAME"
-          echo "Package version: $PACKAGE_VERSION"
-          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version &>/dev/null; then
-            echo "Version $PACKAGE_VERSION already exists on npm"
-            echo "should_publish=false" >> $GITHUB_OUTPUT
-          else
-            echo "Version $PACKAGE_VERSION is new"
-            echo "should_publish=true" >> $GITHUB_OUTPUT
-          fi
-      - name: Publish to NPM
-        if: steps.check_version.outputs.should_publish == 'true'
-        run: |
-          ORG="jito-labs"
-          PACKAGE_NAME=$(npm pkg get name | sed 's/"//g')
-          if [[ $PACKAGE_NAME != @$ORG/* ]]; then
-            NEW_NAME="@$ORG/${PACKAGE_NAME#@*/}"
-            npm pkg set name="$NEW_NAME"
-            echo "Updated package name to $NEW_NAME"
-          fi
-          npm publish --verbose --access public
-      - name: Skip publish
-        if: steps.check_version.outputs.should_publish == 'false'
-        run: echo "Skipping publish as this version already exists on npm"
-      - name: Debug publish failure
-        if: failure()
-        run: |
-          echo "NPM logs:"
-          cat /home/runner/.npm/_logs/*.log
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
