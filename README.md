@@ -2,7 +2,7 @@
 
 [![Discord](https://img.shields.io/discord/938287290806042626?label=Discord&logo=discord&style=flat&color=7289DA)](https://discord.gg/jTSmEzaR)
 ![JavaScript](https://img.shields.io/badge/JavaScript-Language-yellow?logo=javascript)
-![npm](https://img.shields.io/npm/v/jito-js-rpc?label=npm&logo=npm)
+[![npm](https://img.shields.io/npm/v/jito-js-rpc?label=npm&logo=npm)](https://www.npmjs.com/package/jito-js-rpc)
 
 The Jito JSON-RPC JavaScript SDK provides an interface for interacting with Jito's enhanced Solana infrastructure. This SDK supports methods for managing bundles and transactions, offering improved performance and additional features while interacting with the Block Engine.
 
