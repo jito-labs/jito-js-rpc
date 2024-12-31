@@ -1,5 +1,5 @@
 const { Connection, PublicKey, Transaction, SystemProgram, ComputeBudgetProgram, Keypair } = require('@solana/web3.js');
-const { JitoJsonRpcClient } = require('../src/index');
+const { JitoJsonRpcClient } = require('../dist/index');
 const bs58 = require('bs58');
 const fs = require('fs');
 
