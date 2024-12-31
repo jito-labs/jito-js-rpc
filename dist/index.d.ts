@@ -3,7 +3,9 @@ export declare class JitoJsonRpcClient {
     private baseUrl;
     private uuid;
     private client;
+    private logger?;
     constructor(baseUrl: string, uuid?: string);
+    enableConsoleLog(): void;
     private sendRequest;
     getTipAccounts(): Promise<RpcResponse<GetTipAccountsResult>>;
     getRandomTipAccount(): Promise<string>;

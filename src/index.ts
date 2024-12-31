@@ -5,6 +5,7 @@ export class JitoJsonRpcClient {
   private baseUrl;
   private uuid;
   private client;
+  private logger?: Console;
 
   constructor(baseUrl: string, uuid: string = '') {
     this.baseUrl = baseUrl;
@@ -14,6 +15,10 @@ export class JitoJsonRpcClient {
         'Content-Type': 'application/json',
       },
     });
+  }
+
+  enableConsoleLog() {
+    this.logger = console;
   }
 
   private async sendRequest(endpoint: string, method: string, params?: any) {
@@ -26,20 +31,20 @@ export class JitoJsonRpcClient {
       params: params || [],
     };
 
-    console.log(`Sending request to: ${url}`);
-    console.log(`Request body: ${JSON.stringify(data, null, 2)}`);
+    this.logger?.log(`Sending request to: ${url}`);
+    this.logger?.log(`Request body: ${JSON.stringify(data, null, 2)}`);
 
     try {
       const response = await this.client.post(url, data);
-      console.log(`Response status: ${response.status}`);
-      console.log(`Response body: ${JSON.stringify(response.data, null, 2)}`);
+      this.logger?.log(`Response status: ${response.status}`);
+      this.logger?.log(`Response body: ${JSON.stringify(response.data, null, 2)}`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error(`HTTP error: ${error.message}`);
+        this.logger?.error(`HTTP error: ${error.message}`);
         throw error;
       } else {
-        console.error(`Unexpected error: ${error}`);
+        this.logger?.error(`Unexpected error: ${error}`);
         throw new Error('An unexpected error occurred');
       }
     }
@@ -104,7 +109,7 @@ export class JitoJsonRpcClient {
         if (response.result && response.result.value && response.result.value.length > 0) {
           const bundleStatus = response.result.value[0];
 
-          console.log(`Bundle status: ${bundleStatus.status}, Landed slot: ${bundleStatus.landed_slot}`);
+          this.logger?.log(`Bundle status: ${bundleStatus.status}, Landed slot: ${bundleStatus.landed_slot}`);
 
           if (bundleStatus.status === "Failed") {
             return bundleStatus;
@@ -114,15 +119,15 @@ export class JitoJsonRpcClient {
             if (detailedStatus.result && detailedStatus.result.value && detailedStatus.result.value.length > 0) {
               return detailedStatus.result.value[0];
             } else {
-              console.log('No detailed status returned for landed bundle.');
+              this.logger?.log('No detailed status returned for landed bundle.');
               return bundleStatus;
             }
           }
         } else {
-          console.log('No status returned for the bundle. It may be invalid or very old.');
+          this.logger?.log('No status returned for the bundle. It may be invalid or very old.');
         }
       } catch (error) {
-        console.error('Error checking bundle status:', error);
+        this.logger?.error('Error checking bundle status:', error);
       }
 
       // Wait for a short time before checking again
@@ -130,7 +135,7 @@ export class JitoJsonRpcClient {
     }
 
     // If we've reached this point, the bundle hasn't reached a final state within the timeout
-    console.log(`Bundle ${bundleId} has not reached a final state within ${timeoutMs}ms`);
+    this.logger?.log(`Bundle ${bundleId} has not reached a final state within ${timeoutMs}ms`);
     return { status: 'Timeout' };
   }
 
