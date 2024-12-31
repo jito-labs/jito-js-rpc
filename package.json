@@ -2,14 +2,17 @@
   "name": "jito-js-rpc",
   "version": "0.1.0",
   "description": "JavaScript RPC client for Jito",
-  "main": "src/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "start": "node src/index.js",
     "test": "jest",
-    "lint": "eslint .",
+    "lint": "tslint -c tslint.json src/**/*.ts",
     "example": "node examples/basic_usage.js",
     "basic_txn": "node examples/basic_txn.js",
-    "basic_bundle": "node examples/basic_bundle.js"
+    "basic_bundle": "node examples/basic_bundle.js",
+    "build": "tsc",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -28,20 +31,21 @@
   },
   "homepage": "https://github.com/jito-labs/jito-js-rpc#readme",
   "dependencies": {
-    "@solana/web3.js": "^1.95.3",
     "axios": "^1.7.7"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
+    "tslint": "^6.1.3",
+    "typescript": "^5.7.2",
     "jest": "^27.0.6"
   },
   "engines": {
     "node": ">=14.0.0"
   },
   "publishConfig": {
-  "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
-  "publishConfig": {
-  "access": "public"
-  }
+  "files": [
+    "./dist/*"
+  ]
 }

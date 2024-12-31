@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.JitoJsonRpcClient = void 0;
 const axios_1 = __importDefault(require("axios"));
 class JitoJsonRpcClient {
-    constructor(baseUrl, uuid) {
+    constructor(baseUrl, uuid = '') {
         this.baseUrl = baseUrl;
         this.uuid = uuid;
         this.client = axios_1.default.create({
@@ -46,9 +46,15 @@ class JitoJsonRpcClient {
         const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
         return this.sendRequest(endpoint, 'getTipAccounts');
     }
-    async getBundleStatuses(params) {
-        const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
-        return this.sendRequest(endpoint, 'getBundleStatuses', params);
+    async getRandomTipAccount() {
+        const tipAccountsResponse = await this.getTipAccounts();
+        if (tipAccountsResponse.result && Array.isArray(tipAccountsResponse.result) && tipAccountsResponse.result.length > 0) {
+            const randomIndex = Math.floor(Math.random() * tipAccountsResponse.result.length);
+            return tipAccountsResponse.result[randomIndex];
+        }
+        else {
+            throw new Error('No tip accounts available');
+        }
     }
     async sendBundle(params) {
         const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
@@ -68,8 +74,50 @@ class JitoJsonRpcClient {
         }
         return this.sendRequest(endpoint, 'sendTransaction', params);
     }
-    static prettify(value) {
-        return JSON.stringify(value, null, 2);
+    async getInFlightBundleStatuses(params) {
+        const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
+        return this.sendRequest(endpoint, 'getInflightBundleStatuses', params);
+    }
+    async getBundleStatuses(params) {
+        const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
+        return this.sendRequest(endpoint, 'getBundleStatuses', params);
+    }
+    async confirmInflightBundle(bundleId, timeoutMs = 60000) {
+        const start = Date.now();
+        while (Date.now() - start < timeoutMs) {
+            try {
+                const response = await this.getInFlightBundleStatuses([[bundleId]]);
+                if (response.result && response.result.value && response.result.value.length > 0) {
+                    const bundleStatus = response.result.value[0];
+                    console.log(`Bundle status: ${bundleStatus.status}, Landed slot: ${bundleStatus.landed_slot}`);
+                    if (bundleStatus.status === "Failed") {
+                        return bundleStatus;
+                    }
+                    else if (bundleStatus.status === "Landed") {
+                        // If the bundle has landed, get more detailed status
+                        const detailedStatus = await this.getBundleStatuses([[bundleId]]);
+                        if (detailedStatus.result && detailedStatus.result.value && detailedStatus.result.value.length > 0) {
+                            return detailedStatus.result.value[0];
+                        }
+                        else {
+                            console.log('No detailed status returned for landed bundle.');
+                            return bundleStatus;
+                        }
+                    }
+                }
+                else {
+                    console.log('No status returned for the bundle. It may be invalid or very old.');
+                }
+            }
+            catch (error) {
+                console.error('Error checking bundle status:', error);
+            }
+            // Wait for a short time before checking again
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        // If we've reached this point, the bundle hasn't reached a final state within the timeout
+        console.log(`Bundle ${bundleId} has not reached a final state within ${timeoutMs}ms`);
+        return { status: 'Timeout' };
     }
 }
 exports.JitoJsonRpcClient = JitoJsonRpcClient;

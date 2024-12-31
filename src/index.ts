@@ -1,15 +1,12 @@
-const axios = require('axios');
+import axios from 'axios';
+import type { RpcResponse, GetTipAccountsResult, SendBundleParams, SendBundleResult, SendTransactionParams, SendTransactionResult, GetInflightBundleStatusesParams, GetInflightBundleStatusesResult, GetBundleStatusesParams, GetBundleStatusesResult } from './types';
 
-/**
- * @typedef {Object} JsonRpcRequest
- * @property {string} jsonrpc
- * @property {number} id
- * @property {string} method
- * @property {any[]} params
- */
+export class JitoJsonRpcClient {
+  private baseUrl;
+  private uuid;
+  private client;
 
-class JitoJsonRpcClient {
-  constructor(baseUrl, uuid) {
+  constructor(baseUrl: string, uuid: string = '') {
     this.baseUrl = baseUrl;
     this.uuid = uuid;
     this.client = axios.create({
@@ -19,9 +16,9 @@ class JitoJsonRpcClient {
     });
   }
 
-  async sendRequest(endpoint, method, params) {
+  private async sendRequest(endpoint: string, method: string, params?: any) {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const data = {
       jsonrpc: '2.0',
       id: 1,
@@ -48,7 +45,7 @@ class JitoJsonRpcClient {
     }
   }
 
-  async getTipAccounts() {
+  async getTipAccounts(): Promise<RpcResponse<GetTipAccountsResult>> {
     const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
     return this.sendRequest(endpoint, 'getTipAccounts');
   }
@@ -63,12 +60,12 @@ class JitoJsonRpcClient {
     }
   }
 
-  async sendBundle(params) {
+  async sendBundle(params: SendBundleParams): Promise<RpcResponse<SendBundleResult>> {
     const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
     return this.sendRequest(endpoint, 'sendBundle', params);
   }
 
-  async sendTxn(params, bundleOnly = false) {
+  async sendTxn(params: SendTransactionParams, bundleOnly = false): Promise<RpcResponse<SendTransactionResult>> {
     let endpoint = '/transactions';
     const queryParams = [];
 
@@ -87,28 +84,28 @@ class JitoJsonRpcClient {
     return this.sendRequest(endpoint, 'sendTransaction', params);
   }
 
-  async getInFlightBundleStatuses(params) {
+  async getInFlightBundleStatuses(params: GetInflightBundleStatusesParams): Promise<RpcResponse<GetInflightBundleStatusesResult>> {
     const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
     return this.sendRequest(endpoint, 'getInflightBundleStatuses', params);
   }
 
-  async getBundleStatuses(params) {
+  async getBundleStatuses(params: GetBundleStatusesParams): Promise<RpcResponse<GetBundleStatusesResult>> {
     const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
     return this.sendRequest(endpoint, 'getBundleStatuses', params);
   }
 
-  async confirmInflightBundle(bundleId, timeoutMs = 60000) {
+  async confirmInflightBundle(bundleId: string, timeoutMs = 60000) {
     const start = Date.now();
-    
+
     while (Date.now() - start < timeoutMs) {
       try {
         const response = await this.getInFlightBundleStatuses([[bundleId]]);
-        
+
         if (response.result && response.result.value && response.result.value.length > 0) {
           const bundleStatus = response.result.value[0];
-          
+
           console.log(`Bundle status: ${bundleStatus.status}, Landed slot: ${bundleStatus.landed_slot}`);
-          
+
           if (bundleStatus.status === "Failed") {
             return bundleStatus;
           } else if (bundleStatus.status === "Landed") {
@@ -131,12 +128,10 @@ class JitoJsonRpcClient {
       // Wait for a short time before checking again
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
-    
+
     // If we've reached this point, the bundle hasn't reached a final state within the timeout
     console.log(`Bundle ${bundleId} has not reached a final state within ${timeoutMs}ms`);
     return { status: 'Timeout' };
   }
-  
-}
 
-module.exports = { JitoJsonRpcClient };
+}
