@@ -5,14 +5,13 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "start": "node src/index.js",
     "test": "jest",
     "lint": "tslint -c tslint.json src/**/*.ts",
     "example": "node examples/basic_usage.js",
     "basic_txn": "node examples/basic_txn.js",
     "basic_bundle": "node examples/basic_bundle.js",
     "build": "tsc",
-    "prepublish": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
