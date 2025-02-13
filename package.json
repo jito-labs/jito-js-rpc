@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/jito-labs/jito-js-rpc#readme",
   "dependencies": {
-    "axios": "^1.7.7"
+    "axios": "^1.7.9"
   },
   "devDependencies": {
     "@solana/web3.js": "^1.95.3",
