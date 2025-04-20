@@ -1,6 +1,5 @@
 const { Connection, PublicKey, Transaction, SystemProgram, ComputeBudgetProgram, Keypair } = require('@solana/web3.js');
 const { JitoJsonRpcClient } = require('../src/index');
-const bs58 = require('bs58');
 const fs = require('fs');
 
 async function basicTransaction() {
@@ -20,7 +19,7 @@ async function basicTransaction() {
   // const jitoClient = new JitoJsonRpcClient('https://mainnet.block-engine.jito.wtf/api/v1', "UUID-API-KEY");
 
   // Set up transaction parameters
-  const receiver = new PublicKey("YOUR_RECIEVER_PUBKEY");
+  const receiver = new PublicKey("RECIEVER_KEY");
   
   // Convert the random tip account string to a PublicKey
   const randomTipAccount = await jitoClient.getRandomTipAccount();
@@ -62,13 +61,13 @@ async function basicTransaction() {
   transaction.feePayer = walletKeypair.publicKey;
   transaction.sign(walletKeypair);
 
-  // Serialize and base58 encode the signed transaction
+  // Serialize transaction and encode as base64 (instead of base58)
   const serializedTransaction = transaction.serialize();
-  const base58Transaction = bs58.encode(serializedTransaction);
+  const base64Transaction = Buffer.from(serializedTransaction).toString('base64');
   
   try {
     // Send the transaction using sendTxn method
-    const result = await jitoClient.sendTxn([base58Transaction], false);
+    const result = await jitoClient.sendTxn([base64Transaction], false);
     console.log('Transaction send result:', result);
 
     const signature = result.result;

@@ -19,14 +19,22 @@ class JitoJsonRpcClient {
     });
   }
 
-  async sendRequest(endpoint, method, params) {
+  async sendRequest(endpoint, method, params, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
+    
+    let modifiedParams = params;
+    if ((method === 'sendBundle' || method === 'sendTransaction') && params) {
+      modifiedParams = [
+        params[0], 
+        { encoding: 'base64' }
+      ];
+    }
     
     const data = {
       jsonrpc: '2.0',
       id: 1,
       method,
-      params: params || [],
+      params: modifiedParams || [],
     };
 
     console.log(`Sending request to: ${url}`);
@@ -128,7 +136,6 @@ class JitoJsonRpcClient {
         console.error('Error checking bundle status:', error);
       }
 
-      // Wait for a short time before checking again
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
     
@@ -136,7 +143,11 @@ class JitoJsonRpcClient {
     console.log(`Bundle ${bundleId} has not reached a final state within ${timeoutMs}ms`);
     return { status: 'Timeout' };
   }
-  
+
+  // Utility method for prettier JSON output
+  static prettify(obj) {
+    return JSON.stringify(obj, null, 2);
+  }
 }
 
 module.exports = { JitoJsonRpcClient };
