@@ -96,12 +96,12 @@ class JitoJsonRpcClient {
   }
 
   async getInFlightBundleStatuses(params) {
-    const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
+    const endpoint = this.uuid ? `/getInflightBundleStatuses?uuid=${this.uuid}` : '/getInflightBundleStatuses';
     return this.sendRequest(endpoint, 'getInflightBundleStatuses', params);
   }
 
   async getBundleStatuses(params) {
-    const endpoint = this.uuid ? `/bundles?uuid=${this.uuid}` : '/bundles';
+    const endpoint = this.uuid ? `/getBundleStatuses?uuid=${this.uuid}` : '/getBundleStatuses';
     return this.sendRequest(endpoint, 'getBundleStatuses', params);
   }
 
