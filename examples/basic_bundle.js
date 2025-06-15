@@ -1,5 +1,5 @@
 const { Connection, PublicKey, Transaction, SystemProgram, ComputeBudgetProgram, Keypair, TransactionInstruction } = require('@solana/web3.js');
-const { JitoJsonRpcClient } = require('../src/index');
+const { JitoJsonRpcClient } = require('../dist/index');
 const fs = require('fs');
 
 async function basicBundle() {
@@ -70,7 +70,7 @@ async function basicBundle() {
 
   try {
     // Send the bundle using sendBundle method
-    const result = await jitoClient.sendBundle([[base64EncodedTransaction]]);
+    const result = await jitoClient.sendBundle([[base64EncodedTransaction], { encoding: 'base64' }]);
     console.log('Bundle send result:', result);
 
     const bundleId = result.result;
