@@ -1,5 +1,5 @@
 const { Connection, PublicKey, Transaction, SystemProgram, ComputeBudgetProgram, Keypair } = require('@solana/web3.js');
-const { JitoJsonRpcClient } = require('../src/index');
+const { JitoJsonRpcClient } = require('../dist/index');
 const fs = require('fs');
 
 async function basicTransaction() {
@@ -67,7 +67,7 @@ async function basicTransaction() {
   
   try {
     // Send the transaction using sendTxn method
-    const result = await jitoClient.sendTxn([base64Transaction], false);
+    const result = await jitoClient.sendTxn([base64Transaction, { encoding: 'base64' }], false);
     console.log('Transaction send result:', result);
 
     const signature = result.result;
